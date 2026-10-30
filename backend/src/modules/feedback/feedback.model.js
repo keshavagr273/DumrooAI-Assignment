@@ -110,7 +110,6 @@ const feedbackSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ──────────────────────────────────────────────────────────────────
-feedbackSchema.index({ referenceId: 1 }, { unique: true });
 feedbackSchema.index({ userId: 1 });
 feedbackSchema.index({ organizationId: 1 });
 feedbackSchema.index({ status: 1 });

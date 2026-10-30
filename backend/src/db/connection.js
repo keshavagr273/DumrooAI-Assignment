@@ -1,5 +1,13 @@
+import dns from 'node:dns';
 import mongoose from 'mongoose';
 import env from '../config/env.js';
+
+// Ensure DNS resolution succeeds on Windows/local environments for MongoDB Atlas SRV records
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // If custom DNS fails, system defaults are used
+}
 
 let isConnected = false;
 

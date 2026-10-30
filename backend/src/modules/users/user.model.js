@@ -39,8 +39,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for fast email lookup
-userSchema.index({ email: 1 }, { unique: true });
+// Index for organization lookup
 userSchema.index({ organizationId: 1 });
 
 /**

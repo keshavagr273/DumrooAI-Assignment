@@ -10,7 +10,6 @@ const organizationSchema = new mongoose.Schema(
     },
     slug: {
       type: String,
-      unique: true,
       trim: true,
       lowercase: true,
     },
