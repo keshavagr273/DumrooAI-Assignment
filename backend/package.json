@@ -1,0 +1,41 @@
+{
+  "name": "feedback-system-backend",
+  "version": "1.0.0",
+  "description": "In-App Feedback & Support System — Backend API",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest tests/unit --runInBand",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest tests/integration --runInBand"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
+    "express-validator": "^7.2.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.8.1",
+    "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
+    "uuid": "^11.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "transform": {},
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.js"]
+  }
+}
+

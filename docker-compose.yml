@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Local development MongoDB single-node replica set.
+# Supports transactions (which require a replica set in MongoDB).
+# Usage: docker-compose up -d
+# Then connect with: mongodb://localhost:27017/feedback_system?replicaSet=rs0
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: feedback_mongo
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # One-shot container that initialises the replica set after mongo is healthy
+  mongo-init-replica:
+    image: mongo:7
+    container_name: feedback_mongo_init
+    depends_on:
+      mongo:
+        condition: service_healthy
+    command: >
+      mongosh --host mongo:27017 --eval
+      "rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] })"
+    restart: "no"
+
+volumes:
+  mongo_data:
+
