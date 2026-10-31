@@ -50,3 +50,4 @@ export class StorageInterface {
     throw new Error('listFiles must be implemented by storage provider');
   }
 }
+

@@ -35,3 +35,4 @@ describe('Unit: Reference ID Generator', () => {
     expect(seq2).toBe(seq1 + 1);
   });
 });
+

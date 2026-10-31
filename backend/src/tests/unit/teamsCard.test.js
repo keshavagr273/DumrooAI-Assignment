@@ -67,3 +67,4 @@ describe('Unit: Teams Adaptive Card Builder', () => {
     expect(screenshotAction.url).toBe(mockAttachments[0].signedUrl);
   });
 });
+

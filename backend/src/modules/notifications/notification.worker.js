@@ -106,3 +106,4 @@ export class NotificationWorker {
 
 const notificationWorker = new NotificationWorker();
 export default notificationWorker;
+

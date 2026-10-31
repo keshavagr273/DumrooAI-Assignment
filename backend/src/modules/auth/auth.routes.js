@@ -11,3 +11,4 @@ router.post('/seed', seed);
 router.get('/me', requireAuth, getMe);
 
 export default router;
+

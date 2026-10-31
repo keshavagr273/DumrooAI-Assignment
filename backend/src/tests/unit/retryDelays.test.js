@@ -13,3 +13,4 @@ describe('Unit: Outbox Retry Configuration', () => {
     expect(MAX_RETRY_ATTEMPTS).toBe(5);
   });
 });
+

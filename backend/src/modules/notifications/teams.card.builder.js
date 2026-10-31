@@ -155,3 +155,4 @@ export function buildTeamsAdaptiveCard(feedback, attachmentUrls = [], meta = {})
 }
 
 export default buildTeamsAdaptiveCard;
+

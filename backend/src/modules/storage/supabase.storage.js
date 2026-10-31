@@ -150,3 +150,4 @@ export class SupabaseStorageProvider extends StorageInterface {
 
 const supabaseStorageProvider = new SupabaseStorageProvider();
 export default supabaseStorageProvider;
+
