@@ -180,11 +180,13 @@ export class FeedbackService {
   async getMyReports(user, query) {
     const userId = user.id || user._id;
     const organizationId = user.organizationId;
+    const role = user.role || 'user';
     const { category, status, page = 1, limit = 20 } = query;
 
     const result = await listFeedback({
       userId,
       organizationId,
+      role,
       category,
       status,
       page: Number(page),
@@ -222,8 +224,9 @@ export class FeedbackService {
   async getFeedbackById(user, feedbackId) {
     const userId = user.id || user._id;
     const organizationId = user.organizationId;
+    const role = user.role || 'user';
 
-    const feedback = await findByIdWithAccess(feedbackId, userId, organizationId);
+    const feedback = await findByIdWithAccess(feedbackId, userId, organizationId, role);
     if (!feedback) {
       return null;
     }

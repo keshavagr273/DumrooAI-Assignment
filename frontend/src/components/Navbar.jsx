@@ -103,7 +103,7 @@ export function Navbar() {
             }}
           >
             <History size={14} />
-            My Reports
+            {isAdmin ? 'All Reports' : 'My Reports'}
           </Link>
         </nav>
       </div>

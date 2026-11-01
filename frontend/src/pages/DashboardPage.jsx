@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Users,
   AlertTriangle,
@@ -14,6 +15,7 @@ import { triggerOpenFeedback } from '../features/feedback/hooks/useFeedback.js';
 
 export function DashboardPage() {
   const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   const stats = [
     { label: 'Active Sessions', value: '1,420', change: '+8.2%', icon: Users },
@@ -56,7 +58,7 @@ export function DashboardPage() {
               marginBottom: '6px',
             }}
           >
-            Workspace Overview
+            {isAdmin ? 'Admin Operations' : 'Workspace Overview'}
           </div>
           <h1
             style={{
@@ -67,7 +69,7 @@ export function DashboardPage() {
               margin: '0 0 6px 0',
             }}
           >
-            Welcome, {user?.name || 'Workspace Member'}
+            {isAdmin ? 'System Triage & Feedback Oversight' : `Welcome, ${user?.name || 'Workspace Member'}`}
           </h1>
           <p
             style={{
@@ -77,35 +79,87 @@ export function DashboardPage() {
               margin: 0,
             }}
           >
-            You are logged into the authenticated demo environment. If you hit any bug, UI friction, or have an idea, click the floating <strong>Feedback</strong> button or use the quick action below to capture a screenshot and report it.
+            {isAdmin
+              ? 'You have full administrator access. Directly inspect, filter, triage, and update the status of all user feedback, attachments, and automated webhook dispatches.'
+              : 'You are logged into your workspace. If you hit any bug, UI friction, or have an idea, click the floating Feedback button or use the quick action below to capture a screenshot and report it.'}
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => triggerOpenFeedback('bug')}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '10px 16px',
-            backgroundColor: 'var(--fb-text-primary)',
-            color: 'var(--fb-bg-surface)',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: 500,
-            cursor: 'pointer',
-            transition: 'opacity 150ms ease',
-            whiteSpace: 'nowrap',
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-        >
-          <LifeBuoy size={16} />
-          <span>Report an Issue</span>
-          <ArrowRight size={14} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          {isAdmin ? (
+            <>
+              <Link
+                to="/reports"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 16px',
+                  backgroundColor: 'var(--fb-text-primary)',
+                  color: 'var(--fb-bg-surface)',
+                  textDecoration: 'none',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  transition: 'opacity 150ms ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <ShieldCheck size={16} />
+                <span>Triage All Reports</span>
+                <ArrowRight size={14} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => triggerOpenFeedback('bug')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 14px',
+                  backgroundColor: 'var(--fb-bg-surface)',
+                  color: 'var(--fb-text-primary)',
+                  border: '1px solid var(--fb-border-color)',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'background-color 150ms ease',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <LifeBuoy size={15} />
+                <span>Test Feedback Modal</span>
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => triggerOpenFeedback('bug')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '10px 16px',
+                backgroundColor: 'var(--fb-text-primary)',
+                color: 'var(--fb-bg-surface)',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: 500,
+                cursor: 'pointer',
+                transition: 'opacity 150ms ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+            >
+              <LifeBuoy size={16} />
+              <span>Report an Issue</span>
+              <ArrowRight size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Metrics Row */}

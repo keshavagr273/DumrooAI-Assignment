@@ -295,7 +295,7 @@ export function ReportsPage() {
                       {report.attachments.map((att, idx) => (
                         <a
                           key={idx}
-                          href={att.signedUrl || '#'}
+                          href={att.signedDownloadUrl || att.signedUrl || '#'}
                           target="_blank"
                           rel="noreferrer"
                           style={{

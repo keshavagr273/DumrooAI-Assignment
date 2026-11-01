@@ -34,8 +34,12 @@ export async function findByIdempotencyKey(userId, idempotencyKey) {
 /**
  * Find a feedback document by ID, enforcing user/org access.
  */
-export async function findByIdWithAccess(feedbackId, userId, organizationId) {
+export async function findByIdWithAccess(feedbackId, userId, organizationId, role = 'user') {
   const query = { _id: feedbackId };
+  if (role === 'admin') {
+    // System Admins can view any feedback report
+    return Feedback.findOne(query);
+  }
   if (organizationId) {
     // Org members can see all org feedback
     query.$or = [{ userId }, { organizationId }];
@@ -46,12 +50,14 @@ export async function findByIdWithAccess(feedbackId, userId, organizationId) {
 }
 
 /**
- * Paginated list of feedback for a user / organization.
+ * Paginated list of feedback for a user / organization / admin.
  */
-export async function listFeedback({ userId, organizationId, category, status, page = 1, limit = 20 }) {
+export async function listFeedback({ userId, organizationId, role = 'user', category, status, page = 1, limit = 20 }) {
   const filter = {};
 
-  if (organizationId) {
+  if (role === 'admin') {
+    // Platform / System Admin sees ALL feedback submissions across all users and orgs
+  } else if (organizationId) {
     filter.$or = [{ userId }, { organizationId }];
   } else {
     filter.userId = userId;
