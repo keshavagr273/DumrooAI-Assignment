@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { collectContext } from '../utils/collectContext.js';
 import {
@@ -8,6 +8,16 @@ import {
 } from '../services/feedbackApi.js';
 import { compressImage } from '../utils/compressImage.js';
 import { FEEDBACK_CONFIG } from '../utils/constants.js';
+
+export const FEEDBACK_OPEN_EVENT = 'dumroo:open-feedback';
+
+export function triggerOpenFeedback(category = 'bug') {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent(FEEDBACK_OPEN_EVENT, { detail: { category } })
+    );
+  }
+}
 
 export function useFeedback() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +42,31 @@ export function useFeedback() {
     setSubmittedReport(null);
     idempotencyKeyRef.current = uuidv4();
     setIsOpen(true);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent(FEEDBACK_OPEN_EVENT, { detail: { category: initialCategory } })
+      );
+    }
+  }, []);
+
+  // Sync with global open events from other components (e.g. Dashboard "Report an Issue")
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleGlobalOpen = (e) => {
+      const initialCat = e.detail?.category || 'bug';
+      setCategory(initialCat);
+      setContext(collectContext());
+      setSubmitError(null);
+      setSubmittedReport(null);
+      idempotencyKeyRef.current = uuidv4();
+      setIsOpen(true);
+    };
+
+    window.addEventListener(FEEDBACK_OPEN_EVENT, handleGlobalOpen);
+    return () => {
+      window.removeEventListener(FEEDBACK_OPEN_EVENT, handleGlobalOpen);
+    };
   }, []);
 
   /**

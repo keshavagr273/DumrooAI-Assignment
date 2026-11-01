@@ -131,14 +131,23 @@ export async function getMe() {
     }
   }
 
-  try {
-    const token = localStorage.getItem('dumroo_auth_token');
-    const headers = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+  const token = localStorage.getItem('dumroo_auth_token');
+  // If there's no token at all, the user is unauthenticated - don't fire an unnecessary request that logs 401 in console
+  if (!token) {
+    return null;
+  }
 
+  // If using local demo token without backend token
+  if (token.startsWith('demo-') || token.startsWith('mock-')) {
+    return cachedUser;
+  }
+
+  try {
     const res = await fetch(`${API_BASE}/auth/me`, {
       method: 'GET',
-      headers,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
       credentials: 'include',
     });
 
@@ -148,9 +157,15 @@ export async function getMe() {
         localStorage.setItem('dumroo_auth_user', JSON.stringify(data.data.user));
         return data.data.user;
       }
+    } else if (res.status === 401) {
+      // Token expired or invalid; clear stale session cleanly
+      localStorage.removeItem('dumroo_auth_token');
+      localStorage.removeItem('dumroo_auth_user');
+      return null;
     }
   } catch {
-    // Use cached user if network fails
+    // Return cached user if network temporarily fails
+    return cachedUser;
   }
 
   return cachedUser;

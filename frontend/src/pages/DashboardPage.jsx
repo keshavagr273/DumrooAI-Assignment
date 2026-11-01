@@ -10,11 +10,10 @@ import {
   Zap,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
-import { useFeedback } from '../features/feedback/hooks/useFeedback.js';
+import { triggerOpenFeedback } from '../features/feedback/hooks/useFeedback.js';
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const feedback = useFeedback();
 
   const stats = [
     { label: 'Active Sessions', value: '1,420', change: '+8.2%', icon: Users },
@@ -84,7 +83,7 @@ export function DashboardPage() {
 
         <button
           type="button"
-          onClick={() => feedback.openFeedback()}
+          onClick={() => triggerOpenFeedback('bug')}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
