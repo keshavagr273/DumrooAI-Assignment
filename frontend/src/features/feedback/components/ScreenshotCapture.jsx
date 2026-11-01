@@ -54,3 +54,4 @@ export function ScreenshotCapture({ onCapture, disabled, currentCount, maxCount 
 }
 
 export default ScreenshotCapture;
+

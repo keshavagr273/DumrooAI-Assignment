@@ -28,3 +28,4 @@ describe('DescriptionField Component', () => {
     expect(screen.getByText(/Please write at least 5 more character/i)).toBeInTheDocument();
   });
 });
+

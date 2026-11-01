@@ -40,3 +40,4 @@ export const FEEDBACK_CONFIG = {
   allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp'],
   allowedExtensions: ['png', 'jpg', 'jpeg', 'webp'],
 };
+

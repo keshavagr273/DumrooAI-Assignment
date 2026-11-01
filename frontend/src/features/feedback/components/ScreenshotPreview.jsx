@@ -43,3 +43,4 @@ export function ScreenshotPreview({ attachments, onRemove }) {
 }
 
 export default ScreenshotPreview;
+

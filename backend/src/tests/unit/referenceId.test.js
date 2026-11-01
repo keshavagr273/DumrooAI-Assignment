@@ -1,22 +1,17 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import mongoose from 'mongoose';
 import { generateReferenceId } from '../../modules/feedback/feedback.repository.js';
 import Counter from '../../counters/counter.model.js';
-import env from '../../config/env.js';
-import '../../db/connection.js';
+import { setupTestDB, teardownTestDB } from '../testDb.js';
 
 describe('Unit: Reference ID Generator', () => {
   beforeAll(async () => {
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(env.MONGODB_URI);
-    }
+    await setupTestDB();
   });
 
   afterAll(async () => {
-    // Clean up test counters
     const year = new Date().getFullYear();
-    await Counter.deleteOne({ _id: `feedback-${year}-test` });
-    await mongoose.disconnect();
+    await Counter.deleteOne({ _id: `feedback-${year}-test` }).catch(() => {});
+    await teardownTestDB();
   });
 
   it('should generate a reference ID in FB-YYYY-NNNNN format', async () => {

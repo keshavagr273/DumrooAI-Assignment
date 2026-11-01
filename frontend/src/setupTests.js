@@ -15,3 +15,4 @@ if (!global.URL.createObjectURL) {
 if (!global.URL.revokeObjectURL) {
   global.URL.revokeObjectURL = () => {};
 }
+

@@ -8,3 +8,4 @@ export { compressImage } from './utils/compressImage.js';
 export { FEEDBACK_CATEGORIES, FEEDBACK_CONFIG } from './utils/constants.js';
 export * from './services/feedbackApi.js';
 export default FeedbackWidget;
+

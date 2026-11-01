@@ -58,3 +58,4 @@ export function AuthenticatedLayout() {
 }
 
 export default AuthenticatedLayout;
+

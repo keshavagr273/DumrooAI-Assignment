@@ -59,3 +59,4 @@ export function CategorySelector({ selectedCategory, onSelectCategory }) {
 }
 
 export default CategorySelector;
+

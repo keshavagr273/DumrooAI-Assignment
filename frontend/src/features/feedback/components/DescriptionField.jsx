@@ -69,3 +69,4 @@ export function DescriptionField({ value, onChange, error }) {
 }
 
 export default DescriptionField;
+

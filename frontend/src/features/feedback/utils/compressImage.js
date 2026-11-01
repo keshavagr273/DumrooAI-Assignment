@@ -35,3 +35,4 @@ export async function compressImage(file, options = {}) {
 }
 
 export default compressImage;
+

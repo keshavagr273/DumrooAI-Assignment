@@ -87,3 +87,4 @@ export function useScreenshotCapture() {
 }
 
 export default useScreenshotCapture;
+

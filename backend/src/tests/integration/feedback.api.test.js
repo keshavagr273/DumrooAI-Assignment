@@ -1,13 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
-import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import app from '../../app.js';
-import env from '../../config/env.js';
 import User from '../../modules/users/user.model.js';
 import Feedback from '../../modules/feedback/feedback.model.js';
 import Outbox from '../../modules/notifications/outbox.model.js';
-import '../../db/connection.js';
+import { setupTestDB, teardownTestDB } from '../testDb.js';
 
 describe('Integration: Feedback API Endpoints', () => {
   let userToken = '';
@@ -19,9 +17,7 @@ describe('Integration: Feedback API Endpoints', () => {
   const adminEmail = `adminuser_${Date.now()}@example.com`;
 
   beforeAll(async () => {
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(env.MONGODB_URI);
-    }
+    await setupTestDB();
 
     // Register a standard test user
     const userRes = await request(app)
@@ -54,10 +50,10 @@ describe('Integration: Feedback API Endpoints', () => {
   afterAll(async () => {
     // Clean up test data
     if (testUserId) {
-      await Feedback.deleteMany({ userId: testUserId });
-      await User.deleteMany({ email: { $in: [testEmail, adminEmail] } });
+      await Feedback.deleteMany({ userId: testUserId }).catch(() => {});
+      await User.deleteMany({ email: { $in: [testEmail, adminEmail] } }).catch(() => {});
     }
-    await mongoose.disconnect();
+    await teardownTestDB();
   });
 
   describe('Healthcheck', () => {

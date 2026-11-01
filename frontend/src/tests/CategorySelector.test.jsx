@@ -32,3 +32,4 @@ describe('CategorySelector Component', () => {
     expect(featureButton).toHaveAttribute('aria-checked', 'true');
   });
 });
+

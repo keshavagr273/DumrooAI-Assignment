@@ -31,3 +31,4 @@ describe('ContextDisclosure Component', () => {
     expect(screen.getByText(/Privacy Guarantee/i)).toBeInTheDocument();
   });
 });
+
