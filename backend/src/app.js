@@ -14,9 +14,37 @@ const app = express();
 app.use(helmet());
 
 // Cross-Origin Resource Sharing
+const configuredOrigins = (env.FRONTEND_URL || '')
+  .split(',')
+  .map((u) => u.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: [env.FRONTEND_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Localhost origins
+      if (
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:')
+      ) {
+        return callback(null, true);
+      }
+
+      // Check configured origins
+      if (configuredOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // Allow any Vercel deployment URL (*.vercel.app)
+      if (origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'idempotency-key'],
