@@ -16,7 +16,7 @@ app.use(helmet());
 // Cross-Origin Resource Sharing
 const configuredOrigins = (env.FRONTEND_URL || '')
   .split(',')
-  .map((u) => u.trim())
+  .map((u) => u.trim().replace(/\/$/, ''))
   .filter(Boolean);
 
 app.use(
@@ -25,21 +25,23 @@ app.use(
       // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
       if (!origin) return callback(null, true);
 
+      const normalizedOrigin = origin.replace(/\/$/, '');
+
       // Localhost origins
       if (
-        origin.startsWith('http://localhost:') ||
-        origin.startsWith('http://127.0.0.1:')
+        normalizedOrigin.startsWith('http://localhost:') ||
+        normalizedOrigin.startsWith('http://127.0.0.1:')
       ) {
         return callback(null, true);
       }
 
       // Check configured origins
-      if (configuredOrigins.includes(origin)) {
+      if (configuredOrigins.includes(normalizedOrigin)) {
         return callback(null, true);
       }
 
       // Allow any Vercel deployment URL (*.vercel.app)
-      if (origin.endsWith('.vercel.app')) {
+      if (normalizedOrigin.endsWith('.vercel.app')) {
         return callback(null, true);
       }
 
@@ -87,9 +89,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount modular routes
+// Mount modular routes (both /api/ prefix and root alias for flexible client configurations)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/feedback', feedbackRoutes);
+app.use('/feedback', feedbackRoutes);
 
 // 404 Handler
 app.use((req, res) => {

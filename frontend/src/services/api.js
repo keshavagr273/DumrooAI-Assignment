@@ -1,6 +1,9 @@
-const RAW_BASE = import.meta.env.VITE_API_BASE_URL;
+let RAW_BASE = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/$/, '');
+if (RAW_BASE && !RAW_BASE.endsWith('/api')) {
+  RAW_BASE = `${RAW_BASE}/api`;
+}
 export const API_BASE = RAW_BASE
-  ? RAW_BASE.replace(/\/$/, '')
+  ? RAW_BASE
   : (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
       ? 'https://dumrooai-assignment.onrender.com/api'
       : '/api');
