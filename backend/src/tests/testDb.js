@@ -24,6 +24,7 @@ export async function setupTestDB() {
   // 2. Fall back to MongoMemoryReplSet (supports transactions out of the box)
   try {
     replSet = await MongoMemoryReplSet.create({
+      instanceOpts: [{ launchTimeout: 60000 }],
       replSet: { count: 1, storageEngine: 'wiredTiger' },
     });
     const uri = replSet.getUri();
