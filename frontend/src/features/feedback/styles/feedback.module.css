@@ -157,11 +157,7 @@
 }
 
 .auroraGlow {
-  position: absolute;
-  inset: 0;
-  background: var(--fb-aurora-glow);
-  pointer-events: none;
-  opacity: 0.9;
+  display: none;
 }
 
 .headerContent {
@@ -640,15 +636,15 @@
 
 .successBadgeWrapper {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: var(--fb-radius-full);
-  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  background: var(--fb-cat-feature-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
-  box-shadow: 0 10px 25px -4px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--fb-shadow-md);
 }
 
 .successTitle {

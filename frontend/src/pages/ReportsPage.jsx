@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import {
-  FileText,
   Filter,
-  CheckCircle,
-  Clock,
   ExternalLink,
   ChevronRight,
   ShieldAlert,
   Loader2,
   RefreshCw,
+  Clock,
+  CheckCircle,
 } from 'lucide-react';
 import { fetchMyReports, updateFeedbackStatus } from '../features/feedback/services/feedbackApi.js';
 import { useAuth } from '../hooks/useAuth.jsx';
 
-const STATUS_COLORS = {
-  open: { bg: '#e0e7ff', text: '#4338ca', border: '#c7d2fe' },
-  under_review: { bg: '#fef3c7', text: '#b45309', border: '#fde68a' },
-  in_progress: { bg: '#ede9fe', text: '#6d28d9', border: '#ddd6fe' },
-  resolved: { bg: '#d1fae5', text: '#065f46', border: '#a7f3d0' },
-  closed: { bg: '#f1f5f9', text: '#475569', border: '#e2e8f0' },
-};
+const STATUS_OPTIONS = ['open', 'under_review', 'in_progress', 'resolved', 'closed'];
 
 export function ReportsPage() {
   const { user } = useAuth();
@@ -31,6 +24,8 @@ export function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+
+  const isAdmin = user?.role === 'admin';
 
   const loadReports = async () => {
     setIsLoading(true);
@@ -60,7 +55,7 @@ export function ReportsPage() {
     try {
       await updateFeedbackStatus(reportId, newStatus);
       setReports((prev) =>
-        prev.map((r) => (r._id === reportId ? { ...r, status: newStatus } : r))
+        prev.map((r) => ((r._id === reportId || r.feedbackId === reportId) ? { ...r, status: newStatus } : r))
       );
     } catch (err) {
       alert(`Status update failed: ${err.message}`);
@@ -69,86 +64,127 @@ export function ReportsPage() {
     }
   };
 
+  const getStatusBadge = (status) => {
+    const s = (status || 'open').toLowerCase();
+    let bg = 'var(--fb-bg-subtle)';
+    let color = 'var(--fb-text-secondary)';
+
+    if (s === 'open') {
+      bg = 'var(--fb-cat-ui-bg)';
+      color = 'var(--fb-cat-ui-accent)';
+    } else if (s === 'in_progress' || s === 'under_review') {
+      bg = 'var(--fb-cat-general-bg)';
+      color = 'var(--fb-cat-general-accent)';
+    } else if (s === 'resolved') {
+      bg = 'var(--fb-cat-feature-bg)';
+      color = 'var(--fb-cat-feature-accent)';
+    }
+
+    return (
+      <span
+        style={{
+          display: 'inline-block',
+          padding: '3px 8px',
+          borderRadius: '4px',
+          backgroundColor: bg,
+          color: color,
+          fontSize: '11px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.04em',
+        }}
+      >
+        {s.replace('_', ' ')}
+      </span>
+    );
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Page Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', fontFamily: 'inherit' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, margin: '0 0 4px 0', letterSpacing: '-0.02em', color: 'var(--fb-text-primary)' }}>
-            Feedback & Support History
+          <h1 style={{ fontSize: '20px', fontWeight: 600, margin: '0 0 4px 0', color: 'var(--fb-text-primary)' }}>
+            Feedback & Issue Reports
           </h1>
           <p style={{ fontSize: '13px', color: 'var(--fb-text-secondary)', margin: 0 }}>
-            Track and monitor issues reported by your team and organization
+            {isAdmin ? 'Admin View: Triaging reports across all users' : 'Track and manage your submitted issue reports'}
           </p>
         </div>
 
         <button
           type="button"
           onClick={loadReports}
+          disabled={isLoading}
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '8px 14px',
-            borderRadius: '8px',
-            border: '1px solid var(--fb-border-color)',
+            padding: '7px 12px',
             backgroundColor: 'var(--fb-bg-surface)',
+            border: '1px solid var(--fb-border-color)',
+            borderRadius: '6px',
             color: 'var(--fb-text-primary)',
             fontSize: '12.5px',
-            fontWeight: 500,
-            cursor: 'pointer'
+            cursor: isLoading ? 'not-allowed' : 'pointer',
           }}
         >
-          <RefreshCw size={14} className={isLoading ? 'spinner' : ''} />
-          Refresh
+          <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+          <span>Refresh</span>
         </button>
       </div>
 
       {/* Filter Bar */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '14px 18px',
-        borderRadius: '12px',
-        backgroundColor: 'var(--fb-bg-surface)',
-        border: '1px solid var(--fb-border-color)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12.5px', fontWeight: 600, color: 'var(--fb-text-secondary)' }}>
-          <Filter size={14} />
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          flexWrap: 'wrap',
+          padding: '12px',
+          borderRadius: '8px',
+          backgroundColor: 'var(--fb-bg-surface)',
+          border: '1px solid var(--fb-border-color)',
+        }}
+      >
+        <span style={{ fontSize: '12px', fontWeight: 500, color: 'var(--fb-text-muted)', marginRight: '4px' }}>
           Filters:
-        </div>
+        </span>
 
+        {/* Category Filter */}
         <select
           value={categoryFilter}
-          onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+          onChange={(e) => setCategoryFilter(e.target.value)}
           style={{
             padding: '6px 10px',
             borderRadius: '6px',
             border: '1px solid var(--fb-border-color)',
-            backgroundColor: 'var(--fb-bg-muted)',
+            backgroundColor: 'var(--fb-bg-subtle)',
             color: 'var(--fb-text-primary)',
-            fontSize: '12px'
+            fontSize: '12px',
+            outline: 'none',
           }}
         >
           <option value="">All Categories</option>
           <option value="bug">Bug Report</option>
           <option value="ui_ux">UI / UX Issue</option>
           <option value="feature_request">Feature Request</option>
-          <option value="general">General</option>
+          <option value="general">General Feedback</option>
           <option value="other">Other</option>
         </select>
 
+        {/* Status Filter */}
         <select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          onChange={(e) => setStatusFilter(e.target.value)}
           style={{
             padding: '6px 10px',
             borderRadius: '6px',
             border: '1px solid var(--fb-border-color)',
-            backgroundColor: 'var(--fb-bg-muted)',
+            backgroundColor: 'var(--fb-bg-subtle)',
             color: 'var(--fb-text-primary)',
-            fontSize: '12px'
+            fontSize: '12px',
+            outline: 'none',
           }}
         >
           <option value="">All Statuses</option>
@@ -159,162 +195,154 @@ export function ReportsPage() {
           <option value="closed">Closed</option>
         </select>
 
-        <span style={{ marginLeft: 'auto', fontSize: '12px', color: 'var(--fb-text-muted)' }}>
-          {total} report{total !== 1 ? 's' : ''} found
-        </span>
+        {(categoryFilter || statusFilter) && (
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryFilter('');
+              setStatusFilter('');
+            }}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '6px',
+              border: 'none',
+              background: 'transparent',
+              color: 'var(--fb-primary-500)',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {/* Reports List */}
       {isLoading ? (
-        <div style={{ padding: '60px', textAlign: 'center', color: 'var(--fb-text-muted)' }}>
-          <Loader2 size={32} className="spinner" style={{ margin: '0 auto 12px auto' }} />
-          <div>Loading feedback reports...</div>
-        </div>
-      ) : error ? (
-        <div style={{ padding: '24px', borderRadius: '12px', backgroundColor: 'var(--fb-cat-bug-bg)', color: 'var(--fb-cat-bug-accent)' }}>
-          {error}
+        <div style={{ padding: '60px 0', textAlign: 'center', color: 'var(--fb-text-muted)' }}>
+          <Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 8px auto' }} />
+          <div style={{ fontSize: '13px' }}>Loading reports...</div>
         </div>
       ) : reports.length === 0 ? (
-        <div style={{
-          padding: '60px 24px',
-          textAlign: 'center',
-          backgroundColor: 'var(--fb-bg-surface)',
-          borderRadius: '16px',
-          border: '1px solid var(--fb-border-color)',
-          color: 'var(--fb-text-muted)'
-        }}>
-          <FileText size={40} style={{ margin: '0 auto 12px auto', opacity: 0.4 }} />
-          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--fb-text-primary)', margin: '0 0 6px 0' }}>
-            No Feedback Reports Yet
+        <div
+          style={{
+            padding: '48px 24px',
+            textAlign: 'center',
+            backgroundColor: 'var(--fb-bg-surface)',
+            border: '1px solid var(--fb-border-color)',
+            borderRadius: '10px',
+          }}
+        >
+          <CheckCircle size={32} color="var(--fb-text-muted)" style={{ margin: '0 auto 12px auto' }} />
+          <h3 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--fb-text-primary)', margin: '0 0 6px 0' }}>
+            No Feedback Reports Found
           </h3>
-          <p style={{ fontSize: '13px', margin: 0 }}>
-            Click the floating Feedback button on the bottom-right to submit your first report!
+          <p style={{ fontSize: '13px', color: 'var(--fb-text-secondary)', maxWidth: '400px', margin: '0 auto' }}>
+            {categoryFilter || statusFilter
+              ? 'No reports match your active filter criteria.'
+              : 'You have not submitted any issue reports yet. Use the floating Feedback button at the bottom-right to submit one!'}
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {reports.map((report) => {
-            const statusStyle = STATUS_COLORS[report.status] || STATUS_COLORS.open;
-
+            const reportId = report._id || report.feedbackId;
             return (
               <div
-                key={report._id}
+                key={reportId}
                 style={{
-                  padding: '20px 24px',
-                  borderRadius: '14px',
+                  padding: '16px 20px',
+                  borderRadius: '10px',
                   backgroundColor: 'var(--fb-bg-surface)',
                   border: '1px solid var(--fb-border-color)',
-                  boxShadow: 'var(--fb-shadow-sm)',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px'
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  flexWrap: 'wrap',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '13.5px', color: 'var(--fb-primary-600)' }}>
+                <div style={{ flex: 1, minWidth: '260px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: 600, fontFamily: 'monospace', color: 'var(--fb-text-primary)' }}>
                       {report.referenceId}
                     </span>
-                    <span style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      padding: '2px 8px',
-                      borderRadius: '4px',
-                      backgroundColor: 'var(--fb-bg-muted)',
-                      border: '1px solid var(--fb-border-color)',
-                      textTransform: 'uppercase',
-                      color: 'var(--fb-text-secondary)'
-                    }}>
-                      {report.category.replace('_', ' ')}
+                    {getStatusBadge(report.status)}
+                    <span style={{ fontSize: '11px', color: 'var(--fb-text-muted)', textTransform: 'capitalize' }}>
+                      • {report.category?.replace('_', ' ')}
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'var(--fb-text-muted)' }}>
+                      • {report.createdAt ? new Date(report.createdAt).toLocaleDateString() : 'Today'}
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {/* Admin Status Dropdown */}
-                    {user?.role === 'admin' ? (
-                      <select
-                        value={report.status}
-                        disabled={updatingId === report._id}
-                        onChange={(e) => handleStatusChange(report._id, e.target.value)}
-                        style={{
-                          fontSize: '11.5px',
-                          fontWeight: 600,
-                          padding: '3px 8px',
-                          borderRadius: '6px',
-                          backgroundColor: statusStyle.bg,
-                          color: statusStyle.text,
-                          border: `1px solid ${statusStyle.border}`,
-                          cursor: 'pointer'
-                        }}
-                      >
-                        <option value="open">OPEN</option>
-                        <option value="under_review">UNDER REVIEW</option>
-                        <option value="in_progress">IN PROGRESS</option>
-                        <option value="resolved">RESOLVED</option>
-                        <option value="closed">CLOSED</option>
-                      </select>
-                    ) : (
-                      <span style={{
-                        fontSize: '11.5px',
-                        fontWeight: 600,
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                        backgroundColor: statusStyle.bg,
-                        color: statusStyle.text,
-                        border: `1px solid ${statusStyle.border}`,
-                        textTransform: 'uppercase'
-                      }}>
-                        {report.status.replace('_', ' ')}
-                      </span>
-                    )}
+                  <p style={{ fontSize: '13px', color: 'var(--fb-text-secondary)', margin: '0 0 10px 0', lineHeight: 1.4 }}>
+                    {report.description}
+                  </p>
 
-                    <span style={{ fontSize: '11.5px', color: 'var(--fb-text-muted)' }}>
-                      {new Date(report.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                <p style={{
-                  fontSize: '13.5px',
-                  lineHeight: 1.5,
-                  color: 'var(--fb-text-primary)',
-                  margin: 0,
-                  whiteSpace: 'pre-wrap'
-                }}>
-                  {report.description}
-                </p>
-
-                {/* Screenshots Gallery */}
-                {report.attachments && report.attachments.length > 0 && (
-                  <div style={{ marginTop: '4px' }}>
-                    <div style={{ fontSize: '11.5px', fontWeight: 600, color: 'var(--fb-text-muted)', marginBottom: '8px' }}>
-                      Attachments ({report.attachments.length}):
+                  {/* Context info */}
+                  {report.context && (
+                    <div style={{ fontSize: '11px', color: 'var(--fb-text-muted)', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                      {report.context.pageUrl && <span>URL: {report.context.pageUrl}</span>}
+                      {report.context.browser && <span>Browser: {report.context.browser}</span>}
+                      {report.context.os && <span>OS: {report.context.os}</span>}
                     </div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  )}
+
+                  {/* Attachment links */}
+                  {report.attachments && report.attachments.length > 0 && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
                       {report.attachments.map((att, idx) => (
                         <a
                           key={idx}
-                          href={att.signedDownloadUrl}
+                          href={att.signedUrl || '#'}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noreferrer"
                           style={{
+                            fontSize: '11.5px',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '6px',
-                            padding: '6px 10px',
-                            borderRadius: '6px',
-                            backgroundColor: 'var(--fb-bg-muted)',
+                            gap: '4px',
+                            color: 'var(--fb-primary-500)',
+                            textDecoration: 'none',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            backgroundColor: 'var(--fb-bg-subtle)',
                             border: '1px solid var(--fb-border-color)',
-                            fontSize: '12px',
-                            color: 'var(--fb-primary-600)',
-                            textDecoration: 'none'
                           }}
                         >
-                          <ExternalLink size={13} />
-                          <span>{att.originalFilename || `Screenshot ${idx + 1}`}</span>
+                          <ExternalLink size={11} />
+                          <span>Screenshot {idx + 1}</span>
                         </a>
                       ))}
                     </div>
+                  )}
+                </div>
+
+                {/* Admin Status Triage */}
+                {isAdmin && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--fb-text-muted)' }}>Triage:</span>
+                    <select
+                      value={report.status || 'open'}
+                      disabled={updatingId === reportId}
+                      onChange={(e) => handleStatusChange(reportId, e.target.value)}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: '6px',
+                        border: '1px solid var(--fb-border-color)',
+                        backgroundColor: 'var(--fb-bg-subtle)',
+                        color: 'var(--fb-text-primary)',
+                        fontSize: '11.5px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {STATUS_OPTIONS.map((st) => (
+                        <option key={st} value={st}>
+                          {st.replace('_', ' ').toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 )}
               </div>
@@ -327,4 +355,3 @@ export function ReportsPage() {
 }
 
 export default ReportsPage;
-

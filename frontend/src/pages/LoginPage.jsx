@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageSquare, ShieldCheck, UserCheck, Sparkles, AlertCircle } from 'lucide-react';
+import { MessageSquare, ShieldCheck, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.jsx';
 import { seedDemoUsers } from '../services/api.js';
 
@@ -45,8 +45,8 @@ export function LoginPage() {
     setError(null);
     setLoading(true);
     try {
-      // Seed default users first if needed
-      await seedDemoUsers().catch(() => {});
+      // Non-blocking seed attempt
+      seedDemoUsers().catch(() => {});
       await login(demoEmail, demoPassword);
       navigate('/');
     } catch (err) {
@@ -57,282 +57,395 @@ export function LoginPage() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'var(--fb-bg-muted)',
-      padding: '24px'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '440px',
-        backgroundColor: 'var(--fb-bg-surface)',
-        borderRadius: '20px',
-        border: '1px solid var(--fb-border-color)',
-        boxShadow: 'var(--fb-shadow-xl)',
-        padding: '36px 32px',
-        boxSizing: 'border-box',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Subtle decorative glow */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '140px',
-          background: 'var(--fb-aurora-glow)',
-          pointerEvents: 'none',
-          opacity: 0.8
-        }} />
-
-        <div style={{ position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--fb-bg-muted)',
+        padding: '24px',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '420px',
+          backgroundColor: 'var(--fb-bg-surface)',
+          borderRadius: '16px',
+          border: '1px solid var(--fb-border-color)',
+          boxShadow: 'var(--fb-shadow-lg)',
+          padding: '32px',
+          boxSizing: 'border-box',
+        }}
+      >
+        {/* Brand Header */}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div
+            style={{
+              width: '44px',
+              height: '44px',
               borderRadius: '12px',
-              background: 'var(--fb-accent-gradient)',
-              display: 'flex',
+              backgroundColor: 'var(--fb-text-primary)',
+              color: 'var(--fb-bg-surface)',
+              display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#fff',
-              boxShadow: 'var(--fb-shadow-md)'
-            }}>
-              <MessageSquare size={22} />
-            </div>
-            <div>
-              <h1 style={{ fontSize: '20px', fontWeight: 700, margin: 0, letterSpacing: '-0.02em', color: 'var(--fb-text-primary)' }}>
-                Dumroo Support System
-              </h1>
-              <p style={{ fontSize: '13px', color: 'var(--fb-text-muted)', margin: 0 }}>
-                Sign in to access your authenticated workspace
-              </p>
-            </div>
+              marginBottom: '14px',
+            }}
+          >
+            <MessageSquare size={22} strokeWidth={2.2} />
           </div>
+          <h1
+            style={{
+              fontSize: '20px',
+              fontWeight: 600,
+              letterSpacing: '-0.02em',
+              color: 'var(--fb-text-primary)',
+              margin: '0 0 6px 0',
+            }}
+          >
+            Dumroo <span style={{ color: 'var(--fb-primary-500)' }}>Feedback</span>
+          </h1>
+          <p
+            style={{
+              fontSize: '13px',
+              color: 'var(--fb-text-secondary)',
+              margin: 0,
+            }}
+          >
+            {isRegister
+              ? 'Create your account to get started'
+              : 'Sign in to access your workspace'}
+          </p>
+        </div>
 
-          {/* Quick Demo Logins Banner */}
-          <div style={{
-            marginTop: '20px',
-            marginBottom: '24px',
-            padding: '14px',
-            borderRadius: '12px',
-            backgroundColor: 'var(--fb-primary-50)',
-            border: '1px solid var(--fb-primary-200)',
-          }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--fb-primary-800)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={14} style={{ color: 'var(--fb-primary-600)' }} />
-              One-Click Demo Credentials
+        {/* Demo Fast-Login Section */}
+        {!isRegister && (
+          <div
+            style={{
+              marginBottom: '24px',
+              padding: '16px',
+              backgroundColor: 'var(--fb-bg-subtle)',
+              borderRadius: '12px',
+              border: '1px solid var(--fb-border-color)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--fb-text-muted)',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span>Instant Demo Access</span>
+              <span style={{ fontSize: '10px', color: 'var(--fb-primary-500)' }}>Ready</span>
             </div>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('user@acme.com', 'Password123!')}
                 disabled={loading}
                 style={{
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--fb-primary-300)',
-                  backgroundColor: '#ffffff',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  color: 'var(--fb-primary-700)',
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '4px',
-                  boxShadow: 'var(--fb-shadow-sm)'
+                  gap: '6px',
+                  padding: '9px 12px',
+                  backgroundColor: 'var(--fb-bg-surface)',
+                  border: '1px solid var(--fb-border-color)',
+                  borderRadius: '8px',
+                  color: 'var(--fb-text-primary)',
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 150ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--fb-primary-400)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--fb-border-color)';
                 }}
               >
-                <UserCheck size={13} />
+                <UserCheck size={14} color="var(--fb-text-muted)" />
                 Demo User
               </button>
+
               <button
                 type="button"
                 onClick={() => handleQuickLogin('admin@acme.com', 'Admin123!')}
                 disabled={loading}
                 style={{
-                  padding: '8px 10px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--fb-primary-300)',
-                  backgroundColor: '#ffffff',
-                  fontSize: '11.5px',
-                  fontWeight: 600,
-                  color: 'var(--fb-primary-700)',
-                  cursor: 'pointer',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '4px',
-                  boxShadow: 'var(--fb-shadow-sm)'
+                  gap: '6px',
+                  padding: '9px 12px',
+                  backgroundColor: 'var(--fb-bg-surface)',
+                  border: '1px solid var(--fb-border-color)',
+                  borderRadius: '8px',
+                  color: 'var(--fb-text-primary)',
+                  fontSize: '12.5px',
+                  fontWeight: 500,
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'all 150ms ease',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--fb-primary-400)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--fb-border-color)';
                 }}
               >
-                <ShieldCheck size={13} />
+                <ShieldCheck size={14} color="var(--fb-primary-500)" />
                 Demo Admin
               </button>
             </div>
           </div>
+        )}
 
-          {error && (
-            <div style={{
+        {/* Error Alert */}
+        {error && (
+          <div
+            style={{
               display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 14px',
-              borderRadius: '8px',
+              alignItems: 'flex-start',
+              gap: '10px',
+              padding: '12px 14px',
               backgroundColor: 'var(--fb-cat-bug-bg)',
               border: '1px solid var(--fb-cat-bug-border)',
+              borderRadius: '8px',
               color: 'var(--fb-cat-bug-accent)',
-              fontSize: '12px',
-              marginBottom: '16px'
-            }}>
-              <AlertCircle size={16} />
-              <span>{error}</span>
-            </div>
+              fontSize: '12.5px',
+              lineHeight: 1.4,
+              marginBottom: '20px',
+            }}
+          >
+            <AlertCircle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Auth Form */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {isRegister && (
+            <>
+              <div>
+                <label
+                  htmlFor="name"
+                  style={{
+                    display: 'block',
+                    fontSize: '12.5px',
+                    fontWeight: 500,
+                    color: 'var(--fb-text-secondary)',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  required
+                  placeholder="Alex Morgan"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    backgroundColor: 'var(--fb-bg-subtle)',
+                    border: '1px solid var(--fb-border-color)',
+                    borderRadius: '8px',
+                    color: 'var(--fb-text-primary)',
+                    fontSize: '13.5px',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 150ms ease',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = 'var(--fb-primary-500)')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--fb-border-color)')}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="org"
+                  style={{
+                    display: 'block',
+                    fontSize: '12.5px',
+                    fontWeight: 500,
+                    color: 'var(--fb-text-secondary)',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Organization (Optional)
+                </label>
+                <input
+                  id="org"
+                  type="text"
+                  placeholder="Acme Global Inc"
+                  value={orgName}
+                  onChange={(e) => setOrgName(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    backgroundColor: 'var(--fb-bg-subtle)',
+                    border: '1px solid var(--fb-border-color)',
+                    borderRadius: '8px',
+                    color: 'var(--fb-text-primary)',
+                    fontSize: '13.5px',
+                    boxSizing: 'border-box',
+                    outline: 'none',
+                    transition: 'border-color 150ms ease',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = 'var(--fb-primary-500)')}
+                  onBlur={(e) => (e.target.style.borderColor = 'var(--fb-border-color)')}
+                />
+              </div>
+            </>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {isRegister && (
-              <>
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--fb-text-primary)' }}>
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Jane Doe"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--fb-border-color)',
-                      backgroundColor: 'var(--fb-bg-surface)',
-                      color: 'var(--fb-text-primary)',
-                      fontSize: '13px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--fb-text-primary)' }}>
-                    Organization Name (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={orgName}
-                    onChange={(e) => setOrgName(e.target.value)}
-                    placeholder="Acme Corp"
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      borderRadius: '8px',
-                      border: '1px solid var(--fb-border-color)',
-                      backgroundColor: 'var(--fb-bg-surface)',
-                      color: 'var(--fb-text-primary)',
-                      fontSize: '13px',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
-              </>
-            )}
-
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--fb-text-primary)' }}>
-                Email Address
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--fb-border-color)',
-                  backgroundColor: 'var(--fb-bg-surface)',
-                  color: 'var(--fb-text-primary)',
-                  fontSize: '13px',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: 'var(--fb-text-primary)' }}>
-                Password
-              </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--fb-border-color)',
-                  backgroundColor: 'var(--fb-bg-surface)',
-                  color: 'var(--fb-text-primary)',
-                  fontSize: '13px',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
+          <div>
+            <label
+              htmlFor="email"
               style={{
-                marginTop: '8px',
-                padding: '12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: 'var(--fb-button-gradient)',
-                color: '#fff',
-                fontSize: '13.5px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                boxShadow: 'var(--fb-shadow-md)',
-                transition: 'all 150ms'
-              }}
-            >
-              {loading ? 'Please wait...' : isRegister ? 'Create Account' : 'Sign In'}
-            </button>
-          </form>
-
-          <div style={{ marginTop: '20px', textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsRegister(!isRegister);
-                setError(null);
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--fb-primary-600)',
+                display: 'block',
                 fontSize: '12.5px',
                 fontWeight: 500,
-                cursor: 'pointer',
-                textDecoration: 'underline'
+                color: 'var(--fb-text-secondary)',
+                marginBottom: '6px',
               }}
             >
-              {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Register"}
-            </button>
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              placeholder="alex@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                backgroundColor: 'var(--fb-bg-subtle)',
+                border: '1px solid var(--fb-border-color)',
+                borderRadius: '8px',
+                color: 'var(--fb-text-primary)',
+                fontSize: '13.5px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 150ms ease',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'var(--fb-primary-500)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--fb-border-color)')}
+            />
           </div>
+
+          <div>
+            <label
+              htmlFor="password"
+              style={{
+                display: 'block',
+                fontSize: '12.5px',
+                fontWeight: 500,
+                color: 'var(--fb-text-secondary)',
+                marginBottom: '6px',
+              }}
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                backgroundColor: 'var(--fb-bg-subtle)',
+                border: '1px solid var(--fb-border-color)',
+                borderRadius: '8px',
+                color: 'var(--fb-text-primary)',
+                fontSize: '13.5px',
+                boxSizing: 'border-box',
+                outline: 'none',
+                transition: 'border-color 150ms ease',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'var(--fb-primary-500)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--fb-border-color)')}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              padding: '11px',
+              marginTop: '4px',
+              backgroundColor: 'var(--fb-primary-500)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 150ms ease, opacity 150ms ease',
+              opacity: loading ? 0.7 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = 'var(--fb-primary-600)';
+            }}
+            onMouseLeave={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = 'var(--fb-primary-500)';
+            }}
+          >
+            {loading ? <Loader2 size={16} className="animate-spin" /> : null}
+            <span>{isRegister ? 'Create Account' : 'Sign In'}</span>
+          </button>
+        </form>
+
+        {/* Toggle Mode */}
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <button
+            type="button"
+            onClick={() => {
+              setIsRegister(!isRegister);
+              setError(null);
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--fb-text-secondary)',
+              fontSize: '12.5px',
+              cursor: 'pointer',
+              padding: '4px',
+              textDecoration: 'none',
+              transition: 'color 150ms ease',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--fb-text-primary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--fb-text-secondary)')}
+          >
+            {isRegister
+              ? 'Already have an account? Sign in'
+              : "Don't have an account? Register"}
+          </button>
         </div>
       </div>
     </div>
@@ -340,4 +453,3 @@ export function LoginPage() {
 }
 
 export default LoginPage;
-

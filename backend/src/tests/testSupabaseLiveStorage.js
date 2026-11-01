@@ -95,3 +95,4 @@ testSupabaseStorage().catch((err) => {
   console.error('\n❌ Supabase verification failed:', err.message);
   process.exit(1);
 });
+
