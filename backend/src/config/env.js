@@ -16,6 +16,7 @@ const envSchema = z.object({
 
   // Supabase
   SUPABASE_URL: z.string().url(),
+  SUPABASE_DB_URL: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   SUPABASE_STORAGE_BUCKET: z.string().default('feedback-attachments'),
 
