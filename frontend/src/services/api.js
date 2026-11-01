@@ -1,5 +1,9 @@
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL;
-export const API_BASE = RAW_BASE ? RAW_BASE.replace(/\/$/, '') : '/api';
+export const API_BASE = RAW_BASE
+  ? RAW_BASE.replace(/\/$/, '')
+  : (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+      ? 'https://dumrooai-assignment.onrender.com/api'
+      : '/api');
 
 // Safe JSON parser to prevent 'Unexpected end of JSON input'
 async function parseResponseSafely(res) {

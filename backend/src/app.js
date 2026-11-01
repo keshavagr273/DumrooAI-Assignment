@@ -61,6 +61,22 @@ app.use(cookieParser());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
+// Root Landing Endpoint
+app.get('/', (req, res) => {
+  res.json({
+    service: 'Dumroo Feedback & Telemetry API',
+    status: 'online',
+    version: '1.0.0',
+    healthCheck: '/api/health',
+    endpoints: {
+      health: 'GET /api/health',
+      auth: '/api/auth',
+      feedback: '/api/feedback',
+    },
+    docs: 'https://github.com/keshavagr273/DumrooAI-Assignment',
+  });
+});
+
 // Healthcheck
 app.get('/api/health', (req, res) => {
   res.json({

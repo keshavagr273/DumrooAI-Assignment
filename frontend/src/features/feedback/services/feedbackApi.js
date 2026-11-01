@@ -1,5 +1,10 @@
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL;
-const API_BASE = RAW_BASE ? `${RAW_BASE.replace(/\/$/, '')}/feedback` : '/api/feedback';
+const BASE_PREFIX = RAW_BASE
+  ? RAW_BASE.replace(/\/$/, '')
+  : (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
+      ? 'https://dumrooai-assignment.onrender.com/api'
+      : '/api');
+const API_BASE = `${BASE_PREFIX}/feedback`;
 
 function getAuthHeaders(additional = {}) {
   const headers = { ...additional };
